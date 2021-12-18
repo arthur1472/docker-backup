@@ -279,7 +279,7 @@ func backupAll() error {
 	}
 
 	for _, container := range containers {
-		if containerInExluded(container.Names[1:]) {
+		if containerInExcluded(container.Names[1:]) {
 			continue
 		}
 		
