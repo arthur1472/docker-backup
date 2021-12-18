@@ -31,6 +31,7 @@ type Backup struct {
 
 var (
 	optLaunch  = ""
+	optExclude = ""
 	optTar     = false
 	optAll     = false
 	optStopped = false
@@ -278,6 +279,10 @@ func backupAll() error {
 	}
 
 	for _, container := range containers {
+		if containerInExluded(container.Names[1:]) {
+			continue
+		}
+		
 		err := backup(container.ID)
 		if err != nil {
 			return err
@@ -287,8 +292,18 @@ func backupAll() error {
 	return nil
 }
 
+func containerInExcluded(containerName string) bool {
+    for _, excludedName := range strings.Split(optExclude, ",") {
+        if excludedName == containerName {
+            return true
+        }
+    }
+    return false
+}
+
 func init() {
 	backupCmd.Flags().StringVarP(&optLaunch, "launch", "l", "", "launch external program with file-list as argument")
+	backupCmd.Flags().StringVarP(&optExclude, "exclude", "e", "", "names of containers comma separated to exclude from the backup, case sensitive")
 	backupCmd.Flags().BoolVarP(&optTar, "tar", "t", false, "create tar backups")
 	backupCmd.Flags().BoolVarP(&optAll, "all", "a", false, "backup all running containers")
 	backupCmd.Flags().BoolVarP(&optStopped, "stopped", "s", false, "in combination with --all: also backup stopped containers")
